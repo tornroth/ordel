@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Ordel-hjälp</title>
-    <link rel="stylesheet" href="styles.css" />
+    <link rel="stylesheet" href="styles.css?v=3" />
   </head>
   <body>
     <div id="app">
@@ -36,17 +36,81 @@
           </div>
 
           <div class="input-group">
-            <label for="contains"
-              >Bokstäver som måste vara med (men på fel plats)</label
+            <label id="misplaced-label"
+              >Bokstäver som finns, men inte på denna plats</label
             >
-            <input
-              type="text"
-              id="contains"
-              v-model="contains"
-              autocomplete="off"
-              autocapitalize="characters"
-              @input="handleLetterFieldInput($event, 'contains')"
-            />
+            <div class="letter-boxes" aria-labelledby="misplaced-label">
+              <input
+                type="text"
+                class="misplaced-box"
+                id="misplaced-0"
+                v-model="misplacedLetters[0]"
+                maxlength="4"
+                inputmode="text"
+                autocomplete="off"
+                autocapitalize="characters"
+                aria-label="Felplacerade bokstäver för plats 1"
+                @input="handleMisplacedInput($event, 0)"
+                @keydown.backspace="handleMisplacedBackspace($event, 0)"
+                @keydown.space="handleMisplacedSpace($event, 0)"
+              />
+              <input
+                type="text"
+                class="misplaced-box"
+                id="misplaced-1"
+                v-model="misplacedLetters[1]"
+                maxlength="4"
+                inputmode="text"
+                autocomplete="off"
+                autocapitalize="characters"
+                aria-label="Felplacerade bokstäver för plats 2"
+                @input="handleMisplacedInput($event, 1)"
+                @keydown.backspace="handleMisplacedBackspace($event, 1)"
+                @keydown.space="handleMisplacedSpace($event, 1)"
+              />
+              <input
+                type="text"
+                class="misplaced-box"
+                id="misplaced-2"
+                v-model="misplacedLetters[2]"
+                maxlength="4"
+                inputmode="text"
+                autocomplete="off"
+                autocapitalize="characters"
+                aria-label="Felplacerade bokstäver för plats 3"
+                @input="handleMisplacedInput($event, 2)"
+                @keydown.backspace="handleMisplacedBackspace($event, 2)"
+                @keydown.space="handleMisplacedSpace($event, 2)"
+              />
+              <input
+                type="text"
+                class="misplaced-box"
+                id="misplaced-3"
+                v-model="misplacedLetters[3]"
+                maxlength="4"
+                inputmode="text"
+                autocomplete="off"
+                autocapitalize="characters"
+                aria-label="Felplacerade bokstäver för plats 4"
+                @input="handleMisplacedInput($event, 3)"
+                @keydown.backspace="handleMisplacedBackspace($event, 3)"
+                @keydown.space="handleMisplacedSpace($event, 3)"
+              />
+              <input
+                type="text"
+                class="misplaced-box"
+                id="misplaced-4"
+                v-model="misplacedLetters[4]"
+                maxlength="4"
+                inputmode="text"
+                autocomplete="off"
+                autocapitalize="characters"
+                aria-label="Felplacerade bokstäver för plats 5"
+                @input="handleMisplacedInput($event, 4)"
+                @keydown.backspace="handleMisplacedBackspace($event, 4)"
+                @keydown.space="handleMisplacedSpace($event, 4)"
+              />
+            </div>
           </div>
 
           <div class="input-group">
@@ -104,6 +168,6 @@
 
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
     <script src="words.js"></script>
-    <script src="app.js"></script>
+    <script src="app.js?v=3"></script>
   </body>
 </html>

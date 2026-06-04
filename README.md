@@ -6,7 +6,7 @@ En webbaserad hjäplare för det svenska språkspelet Ordel (Swedish Wordle).
 
 - **Sök efter ord** baserat på:
   - Rätt bokstäver på rätt plats i fem separata rutor
-  - Bokstäver som måste vara med men på fel plats
+  - Bokstäver som måste vara med men på fel plats, angivna per position
   - Bokstäver som ska uteslutas
 - **Responsiv design** - fungerar på desktop och mobil
 - **Snabb sökning** - ingen backend behövs
@@ -32,8 +32,8 @@ npx http-server
 1. **Rätt bokstäver på rätt plats**: Skriv bokstäverna som är på rätt plats i de fem rutorna och lämna okända platser tomma
    - Exempel: skriv `S` i första rutan och `E` i sista för ord som börjar med S och slutar med E
 
-2. **Bokstäver som måste vara med**: Skriv bokstäver som finns i ordet men på fel plats
-   - Exempel: `RN` betyder att ordet måste innehålla både R och N
+2. **Bokstäver som finns men är på fel plats**: Skriv bokstäverna i rutan för den plats där de inte får stå. Varje ruta kan innehålla upp till fyra bokstäver
+   - Exempel: skriv `RN` i andra rutan om ordet måste innehålla R och N, men ingen av dem får stå på plats 2
 
 3. **Bokstäver att utesluta**: Skriv bokstäver som inte ska finnas i ordet
    - Exempel: `XYZ` betyder att ordet inte får innehålla X, Y eller Z
@@ -65,7 +65,9 @@ const WORDS = ['abbot', 'abort', ...'nyord']
 
 ```
 ordel/
-├── index.html      # Huvudfil med HTML, CSS och Vue.js app
+├── index.html      # Huvudfil med HTML
+├── app.js          # Vue.js app och söklogik
+├── styles.css      # Sidans styling
 ├── words.js        # Ordlistan
 └── README.md       # Detta dokument
 ```
@@ -74,6 +76,8 @@ ordel/
 
 - Du kan öppna DevTools (F12) och se antal ord i ordlistan
 - Sökningen är skiftokänslig (både stora och små bokstäver fungerar)
+- I fel-platsrutorna hoppar mellanslag framåt och backspace i en tom ruta går tillbaka
+- Samma bokstav i flera fel-platsrutor räknas som minst en förekomst, inte en per ruta
 - Ord med å, ä, ö stöds fullt ut
 - Maximalt 100 ord visas åt gången (om det finns fler än 100 resultat)
 

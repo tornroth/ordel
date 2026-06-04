@@ -4,7 +4,7 @@ createApp({
   data() {
     return {
       correctLetters: ['', '', '', '', ''],
-      contains: '',
+      misplacedLetters: ['', '', '', '', ''],
       exclude: '',
       results: [],
       searching: false,
@@ -43,7 +43,7 @@ createApp({
     getRequiredLetters() {
       return new Set([
         ...this.correctLetters.filter(Boolean),
-        ...this.contains.split('')
+        ...this.getMisplacedLetters()
       ])
     },
     removeRequiredLettersFromExclude() {
@@ -58,10 +58,7 @@ createApp({
         this.sanitizeLetters(event.target.value)
       )
 
-      if (field === 'contains') {
-        this.contains = letters.join('')
-        this.removeRequiredLettersFromExclude()
-      } else if (field === 'exclude') {
+      if (field === 'exclude') {
         const requiredLetters = this.getRequiredLetters()
         this.exclude = letters
           .filter((letter) => !requiredLetters.has(letter))
@@ -70,6 +67,44 @@ createApp({
 
       event.target.value = this[field]
       this.search()
+    },
+    handleMisplacedInput(event, index) {
+      const letters = this.uniqueLetters(
+        this.sanitizeLetters(event.target.value)
+      ).slice(0, 4)
+
+      this.misplacedLetters[index] = letters.join('')
+      event.target.value = this.misplacedLetters[index]
+      this.removeRequiredLettersFromExclude()
+      this.search()
+    },
+    focusMisplacedBox(index) {
+      this.$nextTick(() => {
+        document.getElementById(`misplaced-${index}`)?.focus()
+      })
+    },
+    handleMisplacedBackspace(event, index) {
+      if (this.misplacedLetters[index] || index === 0) return
+
+      event.preventDefault()
+      this.focusMisplacedBox(index - 1)
+    },
+    handleMisplacedSpace(event, index) {
+      event.preventDefault()
+
+      if (index < this.misplacedLetters.length - 1) {
+        this.focusMisplacedBox(index + 1)
+      }
+    },
+    removeCorrectLetterFromMisplaced(letter) {
+      if (!letter) return
+
+      this.misplacedLetters = this.misplacedLetters.map((letters) =>
+        letters
+          .split('')
+          .filter((misplacedLetter) => misplacedLetter !== letter)
+          .join('')
+      )
     },
     focusCorrectBox(index) {
       this.$nextTick(() => {
@@ -88,6 +123,7 @@ createApp({
 
       this.correctLetters[index] = letters[0]
       event.target.value = letters[0]
+      this.removeCorrectLetterFromMisplaced(letters[0])
 
       if (letters.length > 1) {
         this.fillCorrectLetters(letters.slice(1), index + 1)
@@ -102,6 +138,9 @@ createApp({
       const pastedText = event.clipboardData?.getData('text') || ''
       const letters = this.sanitizeLetters(pastedText)
       this.fillCorrectLetters(letters, index)
+      letters.forEach((letter) => {
+        this.removeCorrectLetterFromMisplaced(letter)
+      })
       this.removeRequiredLettersFromExclude()
       this.search()
     },
@@ -125,6 +164,7 @@ createApp({
         const targetIndex = startIndex + offset
         if (targetIndex < this.correctLetters.length) {
           this.correctLetters[targetIndex] = letter
+          this.removeCorrectLetterFromMisplaced(letter)
         }
       })
 
@@ -148,14 +188,29 @@ createApp({
         .map((letter) => letter.toLowerCase() || '_')
         .join('')
     },
+    getMisplacedLetters() {
+      return this.misplacedLetters.flatMap((letters) => letters.split(''))
+    },
+    getMisplacedLettersByPosition() {
+      return this.misplacedLetters.map((letters) =>
+        this.uniqueLetters(letters.toLowerCase().split('').filter(Boolean))
+      )
+    },
     getRequiredLetterCounts() {
-      return [...this.correctLetters, ...this.contains.split('')]
+      const counts = this.correctLetters
         .filter(Boolean)
         .reduce((counts, letter) => {
           const lowerCaseLetter = letter.toLowerCase()
           counts[lowerCaseLetter] = (counts[lowerCaseLetter] || 0) + 1
           return counts
         }, {})
+
+      for (const letter of new Set(this.getMisplacedLetters())) {
+        const lowerCaseLetter = letter.toLowerCase()
+        counts[lowerCaseLetter] = (counts[lowerCaseLetter] || 0) + 1
+      }
+
+      return counts
     },
     getWordLetterCounts(word) {
       return word.split('').reduce((counts, letter) => {
@@ -167,9 +222,14 @@ createApp({
       this.error = ''
       this.hasSearched = true
       const correctPattern = this.getCorrectPattern()
+      const misplacedLettersByPosition = this.getMisplacedLettersByPosition()
       const requiredLetterCounts = this.getRequiredLetterCounts()
 
-      if (!correctPattern && !this.contains && !this.exclude) {
+      if (
+        !correctPattern &&
+        this.misplacedLetters.every((letters) => !letters) &&
+        !this.exclude
+      ) {
         this.results = []
         this.hasSearched = false
         return
@@ -190,6 +250,12 @@ createApp({
                 ) {
                   return false
                 }
+              }
+            }
+
+            for (let index = 0; index < 5; index++) {
+              if (misplacedLettersByPosition[index].includes(word[index])) {
+                return false
               }
             }
 
@@ -224,7 +290,7 @@ createApp({
     },
     clear() {
       this.correctLetters = ['', '', '', '', '']
-      this.contains = ''
+      this.misplacedLetters = ['', '', '', '', '']
       this.exclude = ''
       this.results = []
       this.hasSearched = false

@@ -89,6 +89,24 @@ input[type='text']::placeholder {
   line-height: 1;
 }
 
+.misplaced-box {
+  width: 100%;
+  min-height: 44px;
+  padding: 8px 6px;
+  border-color: #d6b23f;
+  background: #fff8dc;
+  text-align: center;
+  text-transform: uppercase;
+  font-size: clamp(0.85rem, 2.6vw, 1rem);
+  font-weight: 700;
+  line-height: 1;
+}
+
+.misplaced-box:focus {
+  border-color: #c79a11;
+  box-shadow: 0 0 0 3px rgba(199, 154, 17, 0.16);
+}
+
 .button-group {
   display: flex;
   gap: 10px;
@@ -233,5 +251,10 @@ button {
   .word-item {
     padding: 10px;
     font-size: 1em;
+  }
+
+  .misplaced-box {
+    min-height: 40px;
+    padding-inline: 4px;
   }
 }

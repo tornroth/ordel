@@ -5,6 +5,7 @@ createApp({
     return {
       correctLetters: ['', '', '', '', ''],
       misplacedLetters: ['', '', '', '', ''],
+      letterPositions: [0, 1, 2, 3, 4],
       exclude: '',
       results: [],
       searching: false,
@@ -80,20 +81,40 @@ createApp({
     },
     focusMisplacedBox(index) {
       this.$nextTick(() => {
-        document.getElementById(`misplaced-${index}`)?.focus()
+        const box = document.getElementById(`misplaced-${index}`)
+        if (box) box.focus()
       })
     },
-    handleMisplacedBackspace(event, index) {
-      if (this.misplacedLetters[index] || index === 0) return
+    focusExcludeField() {
+      this.$nextTick(() => {
+        const field = document.getElementById('exclude')
+        if (field) field.focus()
+      })
+    },
+    handleExcludeBackspace(event) {
+      if (this.exclude) return
 
       event.preventDefault()
-      this.focusMisplacedBox(index - 1)
+      this.focusMisplacedBox(this.misplacedLetters.length - 1)
+    },
+    handleMisplacedBackspace(event, index) {
+      if (this.misplacedLetters[index]) return
+
+      event.preventDefault()
+
+      if (index === 0) {
+        this.focusCorrectBox(this.correctLetters.length - 1)
+      } else {
+        this.focusMisplacedBox(index - 1)
+      }
     },
     handleMisplacedSpace(event, index) {
       event.preventDefault()
 
       if (index < this.misplacedLetters.length - 1) {
         this.focusMisplacedBox(index + 1)
+      } else {
+        this.focusExcludeField()
       }
     },
     removeCorrectLetterFromMisplaced(letter) {
@@ -108,7 +129,8 @@ createApp({
     },
     focusCorrectBox(index) {
       this.$nextTick(() => {
-        document.getElementById(`correct-${index}`)?.focus()
+        const box = document.getElementById(`correct-${index}`)
+        if (box) box.focus()
       })
     },
     handleCorrectInput(event, index) {
@@ -129,13 +151,17 @@ createApp({
         this.fillCorrectLetters(letters.slice(1), index + 1)
       } else if (index < this.correctLetters.length - 1) {
         this.focusCorrectBox(index + 1)
+      } else {
+        this.focusMisplacedBox(0)
       }
 
       this.removeRequiredLettersFromExclude()
       this.search()
     },
     handleCorrectPaste(event, index) {
-      const pastedText = event.clipboardData?.getData('text') || ''
+      const pastedText = event.clipboardData
+        ? event.clipboardData.getData('text')
+        : ''
       const letters = this.sanitizeLetters(pastedText)
       this.fillCorrectLetters(letters, index)
       letters.forEach((letter) => {
@@ -157,6 +183,8 @@ createApp({
 
       if (index < this.correctLetters.length - 1) {
         this.focusCorrectBox(index + 1)
+      } else {
+        this.focusMisplacedBox(0)
       }
     },
     fillCorrectLetters(letters, startIndex) {
@@ -189,7 +217,10 @@ createApp({
         .join('')
     },
     getMisplacedLetters() {
-      return this.misplacedLetters.flatMap((letters) => letters.split(''))
+      return this.misplacedLetters.reduce(
+        (allLetters, letters) => allLetters.concat(letters.split('')),
+        []
+      )
     },
     getMisplacedLettersByPosition() {
       return this.misplacedLetters.map((letters) =>
